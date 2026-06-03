@@ -6,7 +6,7 @@ import jwt
 import uuid
 from datetime import datetime, timedelta
 from azure.cosmos import CosmosClient
-from openai import OpenAI
+import anthropic
 from dotenv import load_dotenv
 
 load_dotenv()
@@ -18,7 +18,7 @@ COSMOS_KEY = os.getenv("COSMOS_KEY")
 COSMOS_DATABASE = os.getenv("COSMOS_DATABASE", "chatbot-db")
 USERS_CONTAINER = os.getenv("COSMOS_USERS_CONTAINER", "users")
 MESSAGES_CONTAINER = os.getenv("COSMOS_MESSAGES_CONTAINER", "messages")
-OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
+ANTHROPIC_API_KEY = os.getenv("ANTHROPIC_API_KEY")
 JWT_SECRET = os.getenv("JWT_SECRET", "supersecretkey")
 JWT_EXPIRY_HOURS = int(os.getenv("JWT_EXPIRY_HOURS", 24))
 ADMIN_USERNAME = os.getenv("ADMIN_USERNAME", "admin")
@@ -32,8 +32,8 @@ def get_containers():
         database.get_container_client(MESSAGES_CONTAINER)
     )
 
-def get_openai():
-    return OpenAI(api_key=OPENAI_API_KEY)
+def get_anthropic():
+    return anthropic.Anthropic(api_key=ANTHROPIC_API_KEY)
 
 def generate_token(user_id, username, role):
     payload = {
@@ -158,18 +158,19 @@ def chat(req: func.HttpRequest) -> func.HttpResponse:
         query = f"SELECT * FROM c WHERE c.user_id = '{user_id}' AND c.session_id = '{session_id}' ORDER BY c.timestamp ASC OFFSET 0 LIMIT 10"
         history = list(messages_container.query_items(
             query=query, enable_cross_partition_query=True))
-        messages_list = [{"role": "system", "content": "You are a helpful assistant."}]
+        messages_list = []
         for h in history:
             messages_list.append({"role": "user", "content": h["user_message"]})
             messages_list.append({"role": "assistant", "content": h["assistant_response"]})
         messages_list.append({"role": "user", "content": message})
-        openai_client = get_openai()
-        response = openai_client.chat.completions.create(
-            model="gpt-4o-mini",
-            messages=messages_list,
-            max_tokens=500
+        claude_client = get_anthropic()
+        response = claude_client.messages.create(
+            model="claude-haiku-4-5-20251001",
+            max_tokens=500,
+            system="You are a helpful assistant.",
+            messages=messages_list
         )
-        assistant_reply = response.choices[0].message.content
+        assistant_reply = response.content[0].text
         messages_container.create_item({
             "id": str(uuid.uuid4()),
             "user_id": user_id,

@@ -1,4 +1,5 @@
 azure-functions
+anthropic
 azure-cosmos
 openai
 PyJWT
