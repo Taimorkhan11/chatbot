@@ -6,7 +6,7 @@ import jwt
 import uuid
 from datetime import datetime, timedelta
 from azure.cosmos import CosmosClient
-from groq import Groq
+from openai import OpenAI
 from dotenv import load_dotenv
 
 load_dotenv()
@@ -18,7 +18,7 @@ COSMOS_KEY = os.getenv("COSMOS_KEY")
 COSMOS_DATABASE = os.getenv("COSMOS_DATABASE", "chatbot-db")
 USERS_CONTAINER = os.getenv("COSMOS_USERS_CONTAINER", "users")
 MESSAGES_CONTAINER = os.getenv("COSMOS_MESSAGES_CONTAINER", "messages")
-GROQ_API_KEY = os.getenv("GROQ_API_KEY")
+OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
 JWT_SECRET = os.getenv("JWT_SECRET", "supersecretkey")
 JWT_EXPIRY_HOURS = int(os.getenv("JWT_EXPIRY_HOURS", 24))
 ADMIN_USERNAME = os.getenv("ADMIN_USERNAME", "admin")
@@ -32,8 +32,8 @@ def get_containers():
         database.get_container_client(MESSAGES_CONTAINER)
     )
 
-def get_groq():
-    return Groq(api_key=GROQ_API_KEY)
+def get_openai():
+    return OpenAI(api_key=OPENAI_API_KEY)
 
 def generate_token(user_id, username, role):
     payload = {
@@ -163,9 +163,9 @@ def chat(req: func.HttpRequest) -> func.HttpResponse:
             messages_list.append({"role": "user", "content": h["user_message"]})
             messages_list.append({"role": "assistant", "content": h["assistant_response"]})
         messages_list.append({"role": "user", "content": message})
-        groq_client = get_groq()
-        response = groq_client.chat.completions.create(
-            model="llama-3.3-70b-versatile",
+        openai_client = get_openai()
+        response = openai_client.chat.completions.create(
+            model="gpt-4o-mini",
             messages=messages_list,
             max_tokens=500
         )

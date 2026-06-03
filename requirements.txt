@@ -4,7 +4,6 @@ openai
 PyJWT
 bcrypt
 python-dotenv
-groq
 flask
 requests
 aiohttp
