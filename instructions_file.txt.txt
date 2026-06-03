@@ -1,0 +1,36 @@
+===========================================
+SECURE CHATBOT - SETUP INSTRUCTIONS
+===========================================
+
+STEP 1 - INSTALL PYTHON
+Go to: https://python.org
+Download Python 3.11 or higher
+During install CHECK "Add Python to PATH"
+
+STEP 2 - SETUP PROJECT
+Copy all files to: C:\chatbot\
+Rename .env.example to .env
+Fill in your Azure Cosmos DB and API keys
+
+STEP 3 - INSTALL DEPENDENCIES
+Open Command Prompt:
+cd C:\chatbot
+python -m venv venv
+venv\Scripts\activate
+pip install -r requirements.txt
+
+STEP 4 - RUN SERVER
+python test_server.py
+
+STEP 5 - RUN CLIENT (new window)
+python client.py
+
+STEP 6 - TEST
+1. Admin Login: admin / Admin@123
+2. Create User
+3. User Login
+4. Send Message
+5. View History
+
+SUPPORT: Contact me on Upwork for help!
+===========================================
