@@ -1,5 +1,5 @@
 azure-functions
-anthropic
+cohere
 azure-cosmos
 openai
 PyJWT
